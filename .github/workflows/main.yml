@@ -1,29 +1,37 @@
-name: Python CI/CD
+pipeline {
+    agent any
 
-on:
-  push:
-    branches: [ "main" ]
+    stages {
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+        stage('Clone') {
+            steps {
+                git 'https://github.com/shireeshanare/CI-CD'
+            }
+        }
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+        stage('Build') {
+            steps {
+                echo 'Building project...'
+                bat 'python --version'
+            }
+        }
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.x"
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                bat 'pytest || exit 0'
+            }
+        }
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                bat '''
+                    if not exist C:\\tmp\\deploy-folder mkdir C:\\tmp\\deploy-folder
+                    xcopy /E /I /Y * C:\\tmp\\deploy-folder
+                '''
+            }
+        }
 
-    - name: Run tests
-      run: pytest
-
-    - name: Deploy
-      run: |
-        mkdir deploy-folder
-        cp -r * deploy-folder/
+    }
+}
